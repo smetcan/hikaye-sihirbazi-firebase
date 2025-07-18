@@ -1,10 +1,7 @@
-// DÜZELTME: Firebase Functions v2 SDK'sının doğru modüllerini içe aktarıyoruz.
 const { onRequest } = require("firebase-functions/v2/https");
 const { logger } = require("firebase-functions");
 
-// Fonksiyonu v2 formatına göre tanımlıyoruz.
 exports.api = onRequest({ region: "europe-west1" }, async (req, res) => {
-    // CORS ayarları (farklı domainlerden gelen istekler için)
     res.set("Access-Control-Allow-Origin", "*");
     if (req.method === "OPTIONS") {
         res.set("Access-Control-Allow-Methods", "POST");
@@ -21,9 +18,10 @@ exports.api = onRequest({ region: "europe-west1" }, async (req, res) => {
 
     try {
         const { type, prompt } = req.body;
-        // API anahtarını güvenli bir şekilde ortam değişkenlerinden al
-        // DÜZELTME: v2'de config'e process.env üzerinden erişilir.
         const apiKey = process.env.GEMINI_KEY;
+
+        // YENİ LOG SATIRI: Hangi anahtarı kullandığımızı görelim.
+        logger.info(`Kullanılan API Anahtarının başlangıcı: ${apiKey ? apiKey.substring(0, 8) : 'BULUNAMADI'}`);
 
         if (!apiKey) {
             logger.error("Sunucu yapılandırma hatası: GEMINI_KEY ortam değişkeni eksik.");
