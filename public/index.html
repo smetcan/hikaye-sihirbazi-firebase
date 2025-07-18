@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="tr"> <!-- Varsayılan sınıf kaldırıldı, JS yönetecek -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yatma Vakti Hikaye Sihirbazı</title>
+    
+    <!-- Tailwind CSS'i CDN üzerinden yüklüyoruz -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Tailwind'e karanlık mod stratejisinin 'class' olduğunu bildiriyoruz -->
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            // İleride gerekirse buraya özel tema ayarları eklenebilir.
+          }
+        }
+      }
+    </script>
+    
+    <!-- Google Fonts'tan Inter fontunu yüklüyoruz -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+
+    <!-- Lucide İkonları için -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        /* Temel stil ayarları */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Prose stili için özel ayar (hikaye metni) */
+        .prose {
+            color: #334155; /* slate-700 */
+            max-width: 65ch;
+        }
+        .dark .prose {
+             color: #cbd5e1; /* slate-300 */
+        }
+        .prose h1, .prose h2, .prose h3 {
+            color: #1e293b; /* slate-800 */
+        }
+        .dark .prose h1, .dark .prose h2, .dark .prose h3 {
+            color: #f1f5f9; /* slate-100 */
+        }
+        .prose p {
+            margin-top: 1.25em;
+            margin-bottom: 1.25em;
+        }
+    </style>
+</head>
+<body class="antialiased bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-300 flex flex-col items-center justify-center min-h-screen p-4 transition-colors duration-300">
+
+    <div class="w-full max-w-3xl mx-auto">
+        
+        <!-- TEMA DEĞİŞTİRME DÜĞMESİ -->
+        <div class="absolute top-4 right-4">
+            <button id="theme-toggle" type="button" class="text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 focus:outline-none focus:ring-4 focus:ring-slate-200 dark:focus:ring-slate-700 rounded-lg text-sm p-2.5">
+                <svg id="theme-toggle-dark-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>
+                <svg id="theme-toggle-light-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>
+            </button>
+        </div>
+
+        <!-- HEADER -->
+        <header class="text-center pt-12">
+            <div class="inline-block bg-white dark:bg-slate-800 p-4 rounded-full shadow-md">
+                <i data-lucide="book-open" class="h-12 w-12 text-sky-500"></i>
+            </div>
+            <h1 class="text-4xl font-bold text-slate-700 dark:text-slate-200 mt-4">Yatma Vakti Hikaye Sihirbazı</h1>
+            <p class="text-slate-500 dark:text-slate-400 mt-2">Çocuğunuz için sihirli bir hikaye yaratın.</p>
+        </header>
+
+        <main id="main-content" class="bg-white dark:bg-slate-800 rounded-xl shadow-lg transition-all duration-500 mt-6">
+            
+            <!-- HİKAYE OLUŞTURMA FORMU -->
+            <form id="story-form" class="p-8 space-y-6">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="age" class="flex items-center text-sm font-bold text-slate-600 dark:text-slate-400 mb-2">
+                            <i data-lucide="user" class="w-4 h-4 mr-2"></i>Çocuğun Yaşı
+                        </label>
+                        <input id="age" name="age" type="number" value="3" min="1" max="12" class="w-full p-3 bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition-shadow dark:text-slate-300 dark:placeholder-slate-500">
+                    </div>
+                    <div>
+                        <label for="gender" class="flex items-center text-sm font-bold text-slate-600 dark:text-slate-400 mb-2">
+                            <i data-lucide="smile" class="w-4 h-4 mr-2"></i>Cinsiyet
+                        </label>
+                        <select id="gender" name="gender" class="w-full p-3 bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition-shadow appearance-none dark:text-slate-300">
+                            <option>Erkek</option>
+                            <option>Kız</option>
+                            <option>Belirtmek istemiyorum</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="flex items-center text-sm font-bold text-slate-600 dark:text-slate-400 mb-3">
+                        <i data-lucide="star" class="w-4 h-4 mr-2"></i>İlgi Alanları (En fazla 3 tane seçin)
+                    </label>
+                    <div id="interests-container" class="flex flex-wrap gap-3">
+                        <!-- İlgi alanları buraya JS ile eklenecek -->
+                    </div>
+                </div>
+
+                <!-- DÜZENLENDİ: Ana Karakter Adı buraya taşındı -->
+                <div>
+                    <label for="character-name" class="flex items-center text-sm font-bold text-slate-600 dark:text-slate-400 mb-2">
+                        <i data-lucide="contact" class="w-4 h-4 mr-2"></i>Ana Karakterin Adı <span class="ml-2 font-normal text-slate-500">(İsteğe Bağlı)</span>
+                    </label>
+                    <input id="character-name" name="character-name" type="text" placeholder="Örn: Atlas" class="w-full p-3 bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition-shadow dark:text-slate-300 dark:placeholder-slate-500">
+                </div>
+
+                <div>
+                    <label for="style" class="flex items-center text-sm font-bold text-slate-600 dark:text-slate-400 mb-2">
+                        <i data-lucide="wand-2" class="w-4 h-4 mr-2"></i>Hikaye Üslubu
+                    </label>
+                    <select id="style" name="style" class="w-full p-3 bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition-shadow appearance-none dark:text-slate-300">
+                        <option>Sakinleştirici</option>
+                        <option>Komik</option>
+                        <option>Macera Dolu</option>
+                        <option>Sihirli</option>
+                        <option>Ciddi</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="lesson" class="flex items-center text-sm font-bold text-slate-600 dark:text-slate-400 mb-2">
+                        <i data-lucide="brain-circuit" class="w-4 h-4 mr-2"></i>Öğretilmek İstenen Ders
+                    </label>
+                    <input id="lesson" name="lesson" type="text" placeholder="Örn: Paylaşmanın önemi, dürüstlük" class="w-full p-3 bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition-shadow dark:text-slate-300 dark:placeholder-slate-500">
+                </div>
+
+                <div class="pt-4 space-y-4">
+                    <button type="submit" class="w-full bg-sky-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-sky-700 transition-colors duration-300 flex items-center justify-center text-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                        Hikaye Oluştur
+                    </button>
+                    <button id="surprise-btn" type="button" class="w-full bg-amber-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-amber-600 transition-colors duration-300 flex items-center justify-center text-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                        <i data-lucide="dices" class="mr-2"></i>Beni Şaşırt!
+                    </button>
+                </div>
+            </form>
+
+            <!-- YÜKLENİYOR EKRANI -->
+            <div id="loading-state" class="hidden p-16">
+                <div class="flex flex-col items-center justify-center space-y-4">
+                    <i data-lucide="loader" class="h-12 w-12 text-sky-500 animate-spin"></i>
+                    <p class="text-slate-600 dark:text-slate-400 text-lg font-medium">Sihirli kelimeler bir araya geliyor...</p>
+                    <p class="text-slate-500 dark:text-slate-500">Lütfen bekleyin, hikayeniz hazırlanıyor.</p>
+                </div>
+            </div>
+
+            <!-- HİKAYE GÖSTERİM EKRANI -->
+            <div id="story-display" class="hidden p-8 md:p-10">
+                <div id="story-text" class="prose prose-lg max-w-none mb-8 whitespace-pre-wrap">
+                    <!-- Hikaye metni buraya gelecek -->
+                </div>
+                
+                <!-- Sesli Okuma Kontrolleri -->
+                <div id="tts-controls" class="p-4 rounded-lg bg-slate-100 dark:bg-slate-700/50 mb-8 flex items-center justify-center gap-4">
+                    <button id="tts-play-pause-btn" class="p-2 rounded-full bg-sky-500 text-white hover:bg-sky-600 disabled:bg-sky-300">
+                        <i id="tts-play-icon" data-lucide="play" class="w-6 h-6"></i>
+                        <i id="tts-pause-icon" data-lucide="pause" class="w-6 h-6 hidden"></i>
+                    </button>
+                    <button id="tts-stop-btn" class="p-2 rounded-full bg-red-500 text-white hover:bg-red-600 disabled:bg-red-300">
+                        <i data-lucide="stop-circle" class="w-6 h-6"></i>
+                    </button>
+                </div>
+
+                <div class="pt-6 border-t border-slate-200 dark:border-slate-700 flex flex-col gap-4 justify-center">
+                    <button id="continue-story-btn" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition-all duration-300 flex items-center justify-center shadow-md disabled:bg-green-300 disabled:cursor-not-allowed">
+                        <i data-lucide="plus-circle" class="mr-2"></i>
+                        <span class="btn-text">✨ Maceraya Devam Et</span>
+                        <i data-lucide="loader" class="animate-spin mr-2 hidden"></i>
+                    </button>
+                </div>
+                <div class="mt-8 text-center">
+                    <button id="reset-btn" class="bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold py-2 px-6 rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors duration-300">
+                        Yeni Hikaye Oluştur
+                    </button>
+                </div>
+            </div>
+            
+            <!-- HATA EKRANI -->
+            <div id="error-state" class="hidden p-16">
+                 <div class="flex flex-col items-center justify-center text-center">
+                    <div class="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/20 flex items-center justify-center mb-4">
+                        <i data-lucide="alert-triangle" class="w-8 h-8 text-red-500 dark:text-red-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-red-600 dark:text-red-400">Bir Hata Oluştu</h3>
+                    <p id="error-message" class="text-slate-600 dark:text-slate-400 mt-2 mb-6"></p>
+                    <button id="error-reset-btn" class="bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold py-2 px-6 rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors duration-300">
+                        Tekrar Dene
+                    </button>
+                </div>
+            </div>
+
+        </main>
+
+        <footer class="text-center mt-8">
+            <p class="text-sm text-slate-500 dark:text-slate-400">Sevgiyle tasarlandı.</p>
+        </footer>
+    </div>
+
+    <script>
+        // --- UYGULAMA MANTIĞI (VANILLA JS) ---
+
+        // DOM Elementlerini Seçme
+        const storyForm = document.getElementById('story-form');
+        const loadingState = document.getElementById('loading-state');
+        const storyDisplay = document.getElementById('story-display');
+        const errorState = document.getElementById('error-state');
+        const errorMessage = document.getElementById('error-message');
+        const storyText = document.getElementById('story-text');
+        const continueStoryBtn = document.getElementById('continue-story-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const errorResetBtn = document.getElementById('error-reset-btn');
+        const interestsContainer = document.getElementById('interests-container');
+        const themeToggleButton = document.getElementById('theme-toggle');
+        const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+        const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+        const characterNameInput = document.getElementById('character-name');
+        const surpriseBtn = document.getElementById('surprise-btn');
+        const ttsPlayPauseBtn = document.getElementById('tts-play-pause-btn');
+        const ttsStopBtn = document.getElementById('tts-stop-btn');
+        const ttsPlayIcon = document.getElementById('tts-play-icon');
+        const ttsPauseIcon = document.getElementById('tts-pause-icon');
+
+        // --- Tema Yönetimi ---
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+                themeToggleLightIcon.classList.remove('hidden');
+                themeToggleDarkIcon.classList.add('hidden');
+            } else {
+                document.documentElement.classList.remove('dark');
+                themeToggleLightIcon.classList.add('hidden');
+                themeToggleDarkIcon.classList.remove('hidden');
+            }
+        }
+
+        function toggleTheme() {
+            const isDarkMode = document.documentElement.classList.contains('dark');
+            const newTheme = isDarkMode ? 'light' : 'dark';
+            localStorage.setItem('theme', newTheme);
+            applyTheme(newTheme);
+        }
+
+        themeToggleButton.addEventListener('click', toggleTheme);
+
+        function initializeTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (savedTheme) {
+                applyTheme(savedTheme);
+            } else if (prefersDark) {
+                applyTheme('dark');
+            } else {
+                applyTheme('light');
+            }
+        }
+
+
+        // --- İlgi Alanları ---
+        const interestsOptions = [
+            'Hayvanlar', 'Uzay ve Yıldızlar', 'Okyanus ve Deniz Yaşamı', 'Dinazorlar', 
+            'Sihir ve Fantezi', 'Spor', 'Müzik', 'Sanat ve Çizim', 'Doğa ve Orman', 
+            'Süper Kahramanlar', 'Araçlar ve Ulaşım', 'Yemek ve Mutfak', 'Bilim ve Deneyler'
+        ];
+        let selectedInterests = ['Hayvanlar'];
+
+        function renderInterestButtons() {
+            interestsContainer.innerHTML = '';
+            const canSelectMore = selectedInterests.length < 3;
+            interestsOptions.forEach(interest => {
+                const isSelected = selectedInterests.includes(interest);
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.textContent = interest;
+                button.dataset.interest = interest;
+                const baseClasses = 'px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 border-2';
+                const selectedClasses = 'bg-sky-500 border-sky-500 text-white shadow-md';
+                const defaultClasses = 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:border-sky-400 dark:hover:border-sky-500';
+                const disabledClasses = 'opacity-50 cursor-not-allowed bg-slate-100 dark:bg-slate-800';
+                button.className = `${baseClasses} ${isSelected ? selectedClasses : defaultClasses}`;
+                if (!isSelected && !canSelectMore) {
+                    button.disabled = true;
+                    button.className += ` ${disabledClasses}`;
+                }
+                button.addEventListener('click', () => toggleInterest(interest));
+                interestsContainer.appendChild(button);
+            });
+        }
+
+        function toggleInterest(interest) {
+            const index = selectedInterests.indexOf(interest);
+            if (index > -1) {
+                if (selectedInterests.length > 1) selectedInterests.splice(index, 1);
+            } else {
+                if (selectedInterests.length < 3) selectedInterests.push(interest);
+            }
+            renderInterestButtons();
+        }
+
+        // --- API Ayarları ---
+        const SECURE_API_ENDPOINT = '/api/generate'; 
+        let currentStory = '';
+
+        // --- Sesli Okuma (TTS) Yönetimi ---
+        let isSpeaking = false;
+        let isPaused = false;
+        let utterance = null;
+
+        function handleTtsPlayPause() {
+            if (!isSpeaking) { // Oynatmaya başla
+                utterance = new SpeechSynthesisUtterance(currentStory);
+                utterance.lang = 'tr-TR';
+                utterance.onend = handleTtsStop; // Bitince otomatik durdur
+                speechSynthesis.speak(utterance);
+                isSpeaking = true;
+                ttsPlayIcon.classList.add('hidden');
+                ttsPauseIcon.classList.remove('hidden');
+            } else {
+                if (isPaused) { // Duraklatıldıysa devam et
+                    speechSynthesis.resume();
+                    isPaused = false;
+                    ttsPlayIcon.classList.add('hidden');
+                    ttsPauseIcon.classList.remove('hidden');
+                } else { // Çalıyorsa duraklat
+                    speechSynthesis.pause();
+                    isPaused = true;
+                    ttsPlayIcon.classList.remove('hidden');
+                    ttsPauseIcon.classList.add('hidden');
+                }
+            }
+        }
+
+        function handleTtsStop() {
+            speechSynthesis.cancel();
+            isSpeaking = false;
+            isPaused = false;
+            ttsPlayIcon.classList.remove('hidden');
+            ttsPauseIcon.classList.add('hidden');
+        }
+
+        ttsPlayPauseBtn.addEventListener('click', handleTtsPlayPause);
+        ttsStopBtn.addEventListener('click', handleTtsStop);
+
+
+        // --- Fonksiyonlar ---
+
+        function showScreen(screen) {
+            storyForm.classList.add('hidden');
+            loadingState.classList.add('hidden');
+            storyDisplay.classList.add('hidden');
+            errorState.classList.add('hidden');
+            screen.classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function toggleButtonLoading(button, isLoading) {
+            const textSpan = button.querySelector('.btn-text');
+            const loaderIcon = button.querySelector('[data-lucide="loader"]');
+            button.disabled = isLoading;
+            if (isLoading) {
+                textSpan.classList.add('hidden');
+                loaderIcon.classList.remove('hidden');
+            } else {
+                textSpan.classList.remove('hidden');
+                loaderIcon.classList.add('hidden');
+            }
+            lucide.createIcons();
+        }
+
+        async function callSecureApi(type, prompt) {
+            const payload = { type, prompt };
+            const response = await fetch(SECURE_API_ENDPOINT, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) throw new Error(`Sunucu hatası: ${response.status}`);
+            const result = await response.json();
+            if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
+                return result.candidates[0].content.parts[0].text;
+            }
+            console.error("API'den beklenen formatta yanıt alınamadı:", result);
+            throw new Error("API'den geçerli bir yanıt alınamadı.");
+        }
+
+        storyForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showScreen(loadingState);
+            const formData = new FormData(storyForm);
+            const data = Object.fromEntries(formData.entries());
+            
+            let characterInstruction = '';
+            if (data['character-name'].trim() !== '') {
+                characterInstruction = `The main character's name MUST BE ${data['character-name'].trim()}. Refer to the character by this name throughout the story.`;
+            }
+
+            const storyPrompt = `
+              You are a world-class author of children's bedtime stories, specializing in Turkish tales. Your task is to write a magical and calming bedtime story in TURKISH based on the following details.
+              **CRITICAL INSTRUCTIONS:**
+              1. Start the story EXACTLY with "Bir varmış bir yokmuş,".
+              2. The story must be between 500 and 800 words long.
+              3. The content must be appropriate for Turkish culture and values.
+              4. The story should be age-appropriate and subtly weave in the desired lesson.
+              5. ${characterInstruction}
+              **Story Details:**
+              - Child's Age: ${data.age}
+              - Child's Gender: ${data.gender}
+              - Child's Interests: ${selectedInterests.join(', ')}
+              - Story Tone: ${data.style}
+              - Lesson to Teach: ${data.lesson || 'Belirtilmedi'}
+              Please write a comforting and imaginative story in Turkish. Do not add a title.
+            `;
+            try {
+                currentStory = await callSecureApi('story', storyPrompt);
+                storyText.textContent = currentStory;
+                showScreen(storyDisplay);
+            } catch (error) {
+                console.error("Hikaye oluşturulurken hata:", error);
+                errorMessage.textContent = "Hikaye oluşturulurken bir şeyler ters gitti. Lütfen tekrar deneyin.";
+                showScreen(errorState);
+            }
+        });
+
+        continueStoryBtn.addEventListener('click', async () => {
+            toggleButtonLoading(continueStoryBtn, true);
+            try {
+                const continuePrompt = `This is a children's story written in Turkish. Please write the next part of the adventure, continuing from where it left off. Keep the tone and style consistent. The continuation should be about 200-300 words. Story so far: ${currentStory}`;
+                const continuation = await callSecureApi('continue', continuePrompt);
+                currentStory += "\n\n" + continuation;
+                storyText.textContent = currentStory;
+            } catch (error) {
+                console.error("Hikayeye devam edilirken hata:", error);
+            } finally {
+                toggleButtonLoading(continueStoryBtn, false);
+            }
+        });
+        
+        function handleReset() {
+            handleTtsStop(); // Sesli okumayı durdur
+            currentStory = '';
+            selectedInterests = ['Hayvanlar'];
+            renderInterestButtons();
+            storyForm.reset();
+            document.getElementById('age').value = '3';
+            document.getElementById('gender').value = 'Erkek';
+            showScreen(storyForm);
+        }
+
+        // Yeni: Beni Şaşırt Fonksiyonu
+        function handleSurprise() {
+            // Rastgele yaş
+            document.getElementById('age').value = Math.floor(Math.random() * 8) + 3; // 3-10 yaş arası
+            // Rastgele cinsiyet
+            const genders = ['Erkek', 'Kız'];
+            document.getElementById('gender').value = genders[Math.floor(Math.random() * genders.length)];
+            // Rastgele ilgi alanları
+            const shuffledInterests = [...interestsOptions].sort(() => 0.5 - Math.random());
+            const interestCount = Math.floor(Math.random() * 3) + 1; // 1-3 arası
+            selectedInterests = shuffledInterests.slice(0, interestCount);
+            renderInterestButtons();
+            // Rastgele üslup
+            const styles = document.getElementById('style').options;
+            document.getElementById('style').selectedIndex = Math.floor(Math.random() * styles.length);
+            // Diğer alanları temizle
+            document.getElementById('character-name').value = '';
+            document.getElementById('lesson').value = '';
+            // Formu gönder
+            storyForm.requestSubmit();
+        }
+
+        surpriseBtn.addEventListener('click', handleSurprise);
+        resetBtn.addEventListener('click', handleReset);
+        errorResetBtn.addEventListener('click', handleReset);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeTheme();
+            renderInterestButtons();
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>
